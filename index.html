@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>24点 · 像素农场物语</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        body {
+            background: #2C3E2B;
+            background-image: radial-gradient(#4A6E3F 1.5px, #1E2F1C 1.5px);
+            background-size: 32px 32px;
+            font-family: 'VT323', 'Press Start 2P', monospace;
+            padding: 1.5rem 1rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .farmhouse {
+            max-width: 1000px;
+            width: 100%;
+            background: #FCF3E0;
+            border: 6px solid #7B5C3C;
+            box-shadow: 12px 12px 0 #302418;
+            padding: 1.2rem 1.2rem 1.8rem;
+            position: relative;
+            margin: 0 auto;
+            border-radius: 12px;
+        }
+
+        .farmhouse::before {
+            content: "★ Hmmm ★";
+            position: absolute;
+            top: -20px;
+            left: 28px;
+            background: #A77B4A;
+            color: #FFF2C9;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            padding: 4px 12px;
+            border: 2px solid #5C3F20;
+            box-shadow: 4px 4px 0 #342415;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            border-radius: 8px;
+        }
+
+        .pixel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+            gap: 1rem;
+        }
+        .title-area {
+            flex: 1;
+            text-align: left;
+        }
+        .title-area h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.2rem;
+            color: #5A7540;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            word-break: keep-all;
+        }
+        .title-area h1 i { color: #A57646; font-size: 1.2rem; }
+        .sub {
+            font-family: 'VT323', monospace;
+            font-size: 0.8rem;
+            color: #A18D64;
+            margin-top: 0.2rem;
+        }
+
+        .pixel-cat-wrapper {
+            position: relative;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        canvas {
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            border: 3px solid #8E6E48;
+            background: #E2D3AE;
+            box-shadow: 5px 5px 0 #5A432A;
+            display: block;
+            border-radius: 8px;
+        }
+
+        /* 数字卡片网格 (可点击) */
+        .card-row {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(70px, 90px));
+            justify-content: center;
+            gap: 1.2rem;
+            margin: 0.8rem 0 1.2rem;
+        }
+        @media (max-width: 520px) {
+            .card-row {
+                grid-template-columns: repeat(2, minmax(70px, 90px));
+                gap: 1rem;
+            }
+        }
+        .num-card {
+            background: #ECDEB4;
+            width: 100%;
+            aspect-ratio: 0.88 / 1;
+            border: 4px solid #AB8554;
+            box-shadow: inset 0 0 0 2px #FEF3D6, 6px 6px 0 #624B2E;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 2.5rem;
+            color: #5E7F38;
+            cursor: pointer;
+            transition: 0.05s linear;
+            border-radius: 10px;
+        }
+        .num-card:active {
+            transform: translate(2px, 2px);
+            box-shadow: inset 0 0 0 2px #FEF3D6, 2px 2px 0 #624B2E;
+        }
+        @media (max-width: 520px) {
+            .num-card {
+                font-size: 2rem;
+            }
+        }
+
+        /* 运算符软键盘 */
+        .operator-keypad {
+            background: #DBCAA4;
+            border: 3px solid #A37C4A;
+            padding: 0.6rem;
+            margin: 0.5rem 0 0.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+            border-radius: 12px;
+        }
+        .key-btn {
+            background: #C29464;
+            border: 3px solid #5D4026;
+            box-shadow: 3px 3px 0 #2E2216;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.1rem;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #FEF3DC;
+            transition: 0.05s linear;
+            border-radius: 8px;
+        }
+        .key-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 #2E2216;
+        }
+        .key-btn.special {
+            background: #AD8255;
+            font-size: 0.7rem;
+        }
+        @media (max-width: 520px) {
+            .key-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1rem;
+            }
+            .key-btn.special {
+                font-size: 0.6rem;
+            }
+        }
+
+        /* 按钮区域新布局 */
+        .action-bar {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 0.5rem 0 0.8rem;
+            flex-wrap: wrap;
+        }
+        .input-block {
+            background: #E8D9B4;
+            border: 3px solid #956F44;
+            padding: 0.3rem 0.3rem 0.3rem 1rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin: 0.8rem 0 0.6rem;
+            border-radius: 12px;
+        }
+        .input-block input {
+            flex: 2;
+            min-width: 150px;
+            background: #FFFDF0;
+            border: 2px solid #BC9468;
+            padding: 0.55rem 0.5rem;
+            font-family: 'VT323', monospace;
+            font-size: 1rem;
+            outline: none;
+            color: #4D3C26;
+            border-radius: 8px;
+        }
+        .keyboard-icon-btn {
+            background: #AD8255;
+            border: 3px solid #5D4026;
+            box-shadow: 3px 3px 0 #2E2216;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #FEF3DC;
+            transition: 0.05s linear;
+            border-radius: 8px;
+            font-size: 1.2rem;
+        }
+        .keyboard-icon-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 #2E2216;
+        }
+        .dual-actions {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+        .btn-gen, .pixel-btn {
+            background: #C29464;
+            border: 4px solid #5D4026;
+            box-shadow: 4px 4px 0 #2E2216;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #FEF3DC;
+            padding: 0.45rem 1.1rem;
+            transition: 0.05s linear;
+            border-radius: 10px;
+        }
+        .pixel-btn {
+            background: #AD8255;
+            padding: 0.4rem 1rem;
+            font-size: 0.6rem;
+        }
+        .btn-gen:active, .pixel-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 #2E2216;
+        }
+
+        .feedback {
+            font-family: 'VT323', monospace;
+            font-size: 0.9rem;
+            color: #8C7A5A;
+            text-align: center;
+            margin: 0.4rem 0;
+            background: transparent;
+        }
+        .extra-strip {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+            margin: 0.2rem 0;
+            flex-wrap: wrap;
+        }
+        .pixel-pill {
+            background: #DBCAA4;
+            border: 1px solid #AD8F60;
+            padding: 0.2rem 1rem;
+            font-family: 'VT323', monospace;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 20px;
+        }
+        .solution-pixel {
+            background: #F5EDD4;
+            border-left: 7px solid #87A55C;
+            padding: 0.5rem;
+            font-family: 'VT323', monospace;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+            word-break: break-word;
+            border-radius: 8px;
+        }
+        .tips-area {
+            font-family: 'VT323', monospace;
+            font-size: 0.7rem;
+            color: #8C9A6E;
+            margin-top: 0.2rem;
+            padding-left: 0.5rem;
+            border-top: 1px dotted #CBB77A;
+            line-height: 1.3;
+        }
+
+        .custom-panel {
+            margin-top: 1.2rem;
+            background: #EADCB6;
+            border: 4px solid #9D7C52;
+            padding: 0.7rem;
+            border-radius: 12px;
+        }
+        .custom-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            margin-bottom: 0.6rem;
+            color: #5F7E38;
+        }
+        .custom-inputs-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .num-inputs-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.6rem;
+        }
+        .pixel-num-input {
+            background: #FFF5E2;
+            border: 2px solid #C2A26C;
+            padding: 0.4rem 0.2rem;
+            text-align: center;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            width: 100%;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        .custom-solve-btn-wrapper {
+            display: flex;
+            justify-content: flex-start;
+        }
+        .solver-list {
+            background: #FEF9E8;
+            border: 1px solid #CEB27D;
+            padding: 0.5rem;
+            max-height: 160px;
+            overflow-y: auto;
+            font-family: 'VT323', monospace;
+            font-size: 0.85rem;
+            color: #5B553B;
+            border-radius: 8px;
+            margin-top: 0.6rem;
+        }
+        .gray-hint {
+            font-family: 'VT323', monospace;
+            font-size: 0.7rem;
+            color: #AC9B70;
+            margin-top: 5px;
+        }
+
+        .history-area {
+            margin-top: 1.2rem;
+            border-top: 3px solid #D4BB88;
+            padding-top: 0.8rem;
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            padding: 0.2rem 0;
+            color: #735C3A;
+            flex-wrap: wrap;
+        }
+        .history-list-collapse {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            background: #EBDDBF;
+            border-radius: 8px;
+        }
+        .history-list-collapse.open {
+            max-height: 260px;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+        .history-item {
+            background: #FCF5E1;
+            border: 1px solid #C7A871;
+            padding: 0.3rem 0.7rem;
+            margin-bottom: 0.4rem;
+            display: flex;
+            justify-content: space-between;
+            font-family: 'VT323', monospace;
+            font-size: 0.8rem;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            border-radius: 8px;
+        }
+        .history-nums {
+            background: #E0CEA0;
+            padding: 0.1rem 0.4rem;
+            white-space: nowrap;
+            border-radius: 6px;
+        }
+        footer {
+            font-size: 0.55rem;
+            text-align: center;
+            margin-top: 1rem;
+            color: #AE9A6E;
+        }
+        button { cursor: pointer; }
+
+        /* 全新气泡框 (无白边箭头) 使用 clip-path 实现完美三角 */
+        .pixel-dialog {
+            position: absolute;
+            top: 12px;
+            right: 82px;
+            width: 180px;
+            background: #FFFFFF;
+            border: 3px solid #000000;
+            padding: 8px 12px;
+            font-family: 'VT323', monospace;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #000000;
+            box-shadow: 4px 4px 0 #888888;
+            z-index: 120;
+            word-break: break-word;
+            white-space: normal;
+            border-radius: 12px;
+        }
+        /* 使用 clip-path 绘制指向右边的三角，与主体无缝连接 */
+        .pixel-dialog::before {
+            content: '';
+            position: absolute;
+            top: 18px;
+            right: -10px;
+            width: 14px;
+            height: 14px;
+            background: #FFFFFF;
+            border: 3px solid #000000;
+            border-left: none;
+            border-bottom: none;
+            transform: rotate(45deg);
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+            /* 只显示三角形的上半部分，使其看起来像箭头 */
+        }
+        /* 更可靠的做法：用两个伪元素 + 旋转，但为了兼容，简化为下面方式 */
+        .pixel-dialog::before {
+            content: '';
+            position: absolute;
+            top: 14px;
+            right: -11px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 8px 0 8px 12px;
+            border-color: transparent transparent transparent #000000;
+        }
+        .pixel-dialog::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            right: -8px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 7px 0 7px 10px;
+            border-color: transparent transparent transparent #FFFFFF;
+        }
+        @media (max-width: 520px) {
+            .pixel-dialog {
+                width: 140px;
+                font-size: 0.7rem;
+                right: 66px;
+                top: 6px;
+                padding: 5px 8px;
+            }
+            .pixel-dialog::before {
+                top: 12px;
+                right: -10px;
+                border-width: 6px 0 6px 9px;
+            }
+            .pixel-dialog::after {
+                top: 13px;
+                right: -7px;
+                border-width: 5px 0 5px 7px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="farmhouse">
+    <div class="pixel-header">
+        <div class="title-area">
+            <h1><i class="fas fa-tree"></i> Hmmm</h1>
+            <div class="sub">+-*/ & ( ) | each number once</div>
+        </div>
+        <div class="pixel-cat-wrapper" id="catWrapper">
+            <canvas id="pixelCatCanvas" width="72" height="72" style="width:72px; height:72px; image-rendering: crisp-edges; image-rendering: pixelated;"></canvas>
+        </div>
+    </div>
+
+    <!-- 数字卡片 (可点击) -->
+    <div class="card-row" id="digitRow">
+        <div class="num-card" data-value="3">3</div>
+        <div class="num-card" data-value="3">3</div>
+        <div class="num-card" data-value="8">8</div>
+        <div class="num-card" data-value="8">8</div>
+    </div>
+
+    <!-- RANDOM 按钮 (放在卡片下方) -->
+    <div style="text-align: center; margin: 0.5rem 0 0.2rem;">
+        <button class="btn-gen" id="generateBtn"><i class="fas fa-dice-d6"></i> RANDOM</button>
+    </div>
+
+    <!-- 运算符软键盘 -->
+    <div class="operator-keypad">
+        <div class="key-btn" data-key="+">+</div>
+        <div class="key-btn" data-key="-">-</div>
+        <div class="key-btn" data-key="*">*</div>
+        <div class="key-btn" data-key="/">/</div>
+        <div class="key-btn" data-key="(">(</div>
+        <div class="key-btn" data-key=")">)</div>
+        <div class="key-btn special" data-key="del">DEL</div>
+        <div class="key-btn special" data-key="clear">C</div>
+    </div>
+
+    <!-- SUBMIT 和 SOLVE 按钮 (放在运算符下方) -->
+    <div class="action-bar">
+        <button class="pixel-btn" id="submitBtn"><i class="fas fa-check"></i> SUBMIT</button>
+        <button class="pixel-btn" id="solveBtn"><i class="fas fa-lightbulb"></i> SOLVE</button>
+    </div>
+
+    <!-- 输入栏 + 键盘图标按钮 -->
+    <div class="input-block">
+        <input type="text" id="formulaInput" placeholder="e.g., 8÷(3-8÷3)" autocomplete="off">
+        <div class="keyboard-icon-btn" id="keyboardTriggerBtn">
+            <i class="fas fa-keyboard"></i>
+        </div>
+    </div>
+
+    <div class="feedback" id="globalMsg">Click [RANDOM] to start</div>
+    <div id="extraActions" class="extra-strip"></div>
+    <div class="solution-pixel" id="solutionPreview">Solution will appear here</div>
+    <div id="tipsArea" class="tips-area">💡 Tip: Click SOLVE to see a 24-point strategy</div>
+
+    <!-- 自定义模块 -->
+    <div class="custom-panel">
+        <div class="custom-title"><i class="fas fa-tractor"></i> CUSTOM NUMBERS</div>
+        <div class="custom-inputs-wrapper">
+            <div class="num-inputs-grid">
+                <input type="number" id="c1" class="pixel-num-input" value="3" min="1" max="13" step="1">
+                <input type="number" id="c2" class="pixel-num-input" value="3" min="1" max="13" step="1">
+                <input type="number" id="c3" class="pixel-num-input" value="8" min="1" max="13" step="1">
+                <input type="number" id="c4" class="pixel-num-input" value="8" min="1" max="13" step="1">
+            </div>
+            <div class="custom-solve-btn-wrapper">
+                <button class="pixel-btn" id="customSolveBtn" style="padding:0.3rem 0.9rem;"><i class="fas fa-calculator"></i> FIND ALL</button>
+            </div>
+        </div>
+        <div class="solver-list" id="customSolutions">Click above to see all solutions</div>
+        <div class="gray-hint">* integers 1-13, shows up to 28 solutions</div>
+    </div>
+
+    <!-- 历史 -->
+    <div class="history-area">
+        <div class="history-header" id="historyToggle">
+            <span><i class="fas fa-history"></i> LAST 10 ROUNDS</span>
+            <i class="fas fa-chevron-down" id="historyArrow"></i>
+        </div>
+        <div class="history-list-collapse" id="historyCollapse">
+            <div id="historyList">No records yet</div>
+        </div>
+    </div>
+    <footer>★ CLICK THE CAT · KazzZZ Presents ★</footer>
+</div>
+
+<script>
+    // ======================= 猫猫绘制 =======================
+    (function() {
+        const canvas = document.getElementById('pixelCatCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        canvas.width = 72;
+        canvas.height = 72;
+
+        const catPattern = [
+            [0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,2,2,0,0,0,0,2,2,0,0],
+            [0,1,5,1,1,0,0,1,1,5,1,0],
+            [0,1,1,1,1,1,1,1,1,1,1,0],
+            [0,1,1,1,1,1,1,1,1,1,1,0],
+            [0,1,1,1,1,4,4,1,1,1,1,0],
+            [0,1,1,1,1,1,1,1,1,1,1,0],
+            [0,2,1,1,1,1,1,1,1,1,2,0],
+            [0,2,1,1,1,1,1,1,1,1,2,0],
+            [0,1,1,1,1,3,3,1,1,1,1,0],
+            [0,1,1,1,3,3,3,3,1,1,1,0],
+            [0,1,1,3,3,3,3,3,3,1,1,0]
+        ];
+
+        function getColor(val) {
+            switch(val) {
+                case 1: return '#F9A66C';
+                case 2: return '#E07C3C';
+                case 3: return '#FEF4E6';
+                case 4: return '#3A2A1F';
+                case 5: return '#FFAAA5';
+                default: return '#A57C5C';
+            }
+        }
+
+        let blinkFlag = false;
+        function drawCat(blinkState = false) {
+            ctx.clearRect(0, 0, 72, 72);
+            const cellW = 72 / 12, cellH = 72 / 12;
+            for (let r = 0; r < 12; r++) {
+                for (let c = 0; c < 12; c++) {
+                    let val = catPattern[r][c];
+                    if (val === 0) continue;
+                    ctx.fillStyle = getColor(val);
+                    ctx.fillRect(c * cellW, r * cellH, cellW, cellH);
+                }
+            }
+            const eyeLX = 4 * cellW + 2, eyeLY = 4 * cellH + 2;
+            const eyeRX = 7 * cellW + 2, eyeRY = 4 * cellH + 2;
+            if (!blinkState) {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(eyeLX + 1, eyeLY + 1, 3, 3);
+                ctx.fillRect(eyeRX + 1, eyeRY + 1, 3, 3);
+                ctx.fillStyle = '#FFF2CC';
+                ctx.fillRect(eyeLX + 2, eyeLY + 2, 1, 1);
+                ctx.fillRect(eyeRX + 2, eyeRY + 2, 1, 1);
+            } else {
+                ctx.fillStyle = '#A56E3A';
+                ctx.fillRect(eyeLX, eyeLY + 3, 6, 2);
+                ctx.fillRect(eyeRX, eyeRY + 3, 6, 2);
+            }
+        }
+        setInterval(() => {
+            blinkFlag = true;
+            drawCat(blinkFlag);
+            setTimeout(() => { blinkFlag = false; drawCat(blinkFlag); }, 150);
+        }, 3800);
+        drawCat(false);
+        window.catBlink = () => {
+            blinkFlag = true; drawCat(blinkFlag);
+            setTimeout(() => { blinkFlag = false; drawCat(blinkFlag); }, 180);
+        };
+    })();
+
+    // ======================= 猫猫对话系统 (颜文字置句首) =======================
+    let dialogTimeout = null;
+    let currentDialog = null;
+    const catWrapper = document.getElementById('catWrapper');
+    
+    function clearDialog() {
+        if (currentDialog) {
+            currentDialog.remove();
+            currentDialog = null;
+        }
+        if (dialogTimeout) {
+            clearTimeout(dialogTimeout);
+            dialogTimeout = null;
+        }
+    }
+    
+    function showCatDialog(message) {
+        clearDialog();
+        const dialog = document.createElement('div');
+        dialog.className = 'pixel-dialog';
+        dialog.innerText = message;
+        catWrapper.appendChild(dialog);
+        currentDialog = dialog;
+        dialogTimeout = setTimeout(() => {
+            if (currentDialog) {
+                currentDialog.remove();
+                currentDialog = null;
+            }
+            dialogTimeout = null;
+        }, 10000);
+    }
+    
+    // 颜文字统一放在句首，后跟空格，防止换行破坏
+    const catMessages = {
+        correct: [
+            "(^･ω･^)✨ ★ Correct! ★", "(=ↀωↀ=)✧ Purrfect! 24 points!", "(ฅ^•ﻌ•^ฅ) Nyaa! You nailed it!", 
+            "(´｡• ᵕ •｡`) ♡ Meow~ Great job!", "(๑•̀ㅂ•́)و✧ +1 paw!", "(っ´▽`)っ★ Hooray!"
+        ],
+        solve: [
+            "(￣ω￣) Hehe, here's the answer!", "(ฅ´ω`ฅ) Mew mew! Look at this~", "(ΦωΦ) Trust my whiskers!",
+            "(￣▽￣)ノ Solution ready", "(^・ω・^ ) My tail knows the way!", "(◕ᴗ◕✿) Nya~ check this out"
+        ],
+        nosolution: [
+            "(´;ω;` ) Meow... no solution?", "(；⌣̀_⌣́) Purr... impossible?", "(´;ω;`) No way...", 
+            "(｡•́︿•̀｡) This set has no answer...", "(´-ω-`) Try another one!", "(×﹏×) Stumped me too!"
+        ],
+        click: [
+            "(^･ω･^) Meow! Need help?", "(ฅ^•ﻌ•^ฅ) Purr... click RANDOM~", "(｀・ω・´) Nyaa! Let's go!",
+            "(*´▽`*) Keep going!", "(◕‿◕✿) Chirp! I believe in you", "(ΦωΦ) What's 24 today?"
+        ]
+    };
+    
+    function triggerCatDialog(type) {
+        let list = catMessages[type] || catMessages.click;
+        let msg = list[Math.floor(Math.random() * list.length)];
+        showCatDialog(msg);
+        if (window.catBlink) window.catBlink();
+    }
+    
+    catWrapper.addEventListener('click', () => {
+        triggerCatDialog('click');
+    });
+    
+    function resetCatDialog() {
+        clearDialog();
+    }
+
+    // ======================= 24点核心逻辑 =======================
+    let currentNumbers = [];
+    let currentSolution = null;
+    let historyStack = [];
+    const MAX_HISTORY = 10;
+
+    const digitRow = document.getElementById('digitRow');
+    const formulaInput = document.getElementById('formulaInput');
+    const globalMsg = document.getElementById('globalMsg');
+    const extraActionsDiv = document.getElementById('extraActions');
+    const solutionPreview = document.getElementById('solutionPreview');
+    const tipsArea = document.getElementById('tipsArea');
+    const generateBtn = document.getElementById('generateBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const solveBtn = document.getElementById('solveBtn');
+    const keyboardTriggerBtn = document.getElementById('keyboardTriggerBtn');
+    const customSolveBtn = document.getElementById('customSolveBtn');
+    const customSolutionsDiv = document.getElementById('customSolutions');
+    const historyListDiv = document.getElementById('historyList');
+    const historyToggle = document.getElementById('historyToggle');
+    const historyArrow = document.getElementById('historyArrow');
+    const historyCollapse = document.getElementById('historyCollapse');
+
+    const tipLibrary = [
+        "Aim for 3×8, 4×6, 12+12, 16+8, 30-6, 72÷3.",
+        "Using fractions like 8÷(3-8÷3) is a classic trick.",
+        "When you see 8, try to make 3 from the others.",
+        "6 and 4 are best friends: 6×4=24.",
+        "If numbers are large, consider addition and subtraction first.",
+        "Try (a+b)×(c+d) when numbers are small.",
+        "Sometimes (a-b)×(c-d) works.",
+        "When stuck, try division to create fractions.",
+        "For repeated numbers, think of a-a, a/a to get 0 or 1.",
+        "Multiply first, then adjust with + or -.",
+        "24 is also 48/2, 72/3, 96/4.",
+        "Using parentheses changes everything."
+    ];
+    function getRandomTip() { return tipLibrary[Math.floor(Math.random() * tipLibrary.length)]; }
+    function updateTips() { tipsArea.innerHTML = `💡 TIP: ${getRandomTip()}`; }
+    function clearTips() { tipsArea.innerHTML = `💡 Tip: Click SOLVE to see a 24-point strategy`; }
+
+    function displayCurrentSolution() {
+        if (!currentNumbers.length) { 
+            solutionPreview.innerText = 'No active puzzle'; 
+            clearTips();
+            return; 
+        }
+        const sol = getOneSolution(currentNumbers);
+        if (sol) { 
+            currentSolution = sol; 
+            solutionPreview.innerHTML = `<i class="fas fa-code"></i> Solution: ${sol} = 24`;
+            updateTips();
+            triggerCatDialog('solve');
+        } else { 
+            solutionPreview.innerHTML = `<i class="fas fa-ban"></i> No solution exists`;
+            clearTips();
+            triggerCatDialog('nosolution');
+        }
+    }
+
+    function findAllSolutions(nums) {
+        const EPS = 1e-6;
+        const isZero = (x) => Math.abs(x) < EPS;
+        const is24 = (x) => Math.abs(x - 24) < EPS;
+        const solSet = new Set();
+        function dfs(arr, exprs) {
+            const n = arr.length;
+            if (n === 1) {
+                if (is24(arr[0])) {
+                    let expr = exprs[0];
+                    if (expr.startsWith('(') && expr.endsWith(')')) {
+                        let depth = 0, ok = true;
+                        for (let i = 1; i < expr.length - 1; i++) {
+                            if (expr[i] === '(') depth++;
+                            if (expr[i] === ')') depth--;
+                            if (depth < 0) { ok = false; break; }
+                        }
+                        if (ok && depth === 0) expr = expr.slice(1, -1);
+                    }
+                    solSet.add(expr);
+                }
+                return;
+            }
+            for (let i = 0; i < n; i++) {
+                for (let j = i+1; j < n; j++) {
+                    const a = arr[i], b = arr[j];
+                    const ea = exprs[i], eb = exprs[j];
+                    const restArr = [], restExpr = [];
+                    for (let k = 0; k < n; k++) if (k !== i && k !== j) { restArr.push(arr[k]); restExpr.push(exprs[k]); }
+                    const cands = [
+                        { val: a+b, expr: `(${ea}+${eb})` },
+                        { val: a-b, expr: `(${ea}-${eb})` },
+                        { val: b-a, expr: `(${eb}-${ea})` },
+                        { val: a*b, expr: `(${ea}*${eb})` }
+                    ];
+                    if (!isZero(b)) cands.push({ val: a/b, expr: `(${ea}/${eb})` });
+                    if (!isZero(a)) cands.push({ val: b/a, expr: `(${eb}/${ea})` });
+                    for (let cand of cands) dfs([...restArr, cand.val], [...restExpr, cand.expr]);
+                }
+            }
+        }
+        dfs(nums, nums.map(v=>v.toString()));
+        return Array.from(solSet).slice(0, 28);
+    }
+
+    function getOneSolution(nums) {
+        const all = findAllSolutions(nums);
+        return all.length ? all[0] : null;
+    }
+
+    function validateExpression(expr, target) {
+        let clean = expr.replace(/\s/g,'');
+        if (!clean) return { valid: false, reason: 'Empty expression' };
+        if (!/^[0-9+\-*/()]+$/.test(clean)) return { valid: false, reason: 'Only numbers + - * / ( )' };
+        const match = clean.match(/\d+/g);
+        if (!match) return { valid: false, reason: 'No numbers found' };
+        const used = match.map(Number);
+        const targetSorted = [...target].sort((a,b)=>a-b);
+        const usedSorted = [...used].sort((a,b)=>a-b);
+        if (targetSorted.length !== usedSorted.length) return { valid: false, reason: `Use exactly 4 numbers` };
+        for (let i=0;i<targetSorted.length;i++) if (targetSorted[i] !== usedSorted[i]) 
+            return { valid: false, reason: `Numbers mismatch, need ${target.join(',')}` };
+        let result;
+        try { const fn = new Function('return ('+clean+')'); result = fn(); } catch(e) { return { valid: false, reason: 'Invalid expression' }; }
+        if (!isFinite(result)) return { valid: false, reason: 'Division by zero' };
+        if (Math.abs(result-24) > 1e-6) return { valid: false, reason: `Result = ${result.toFixed(4)} ≠ 24` };
+        return { valid: true, reason: 'Correct' };
+    }
+
+    function randomNumbers() { return [Math.floor(Math.random()*13)+1, Math.floor(Math.random()*13)+1, Math.floor(Math.random()*13)+1, Math.floor(Math.random()*13)+1]; }
+    function updateCards(nums) {
+        if (!nums.length) {
+            digitRow.innerHTML = `<div class="num-card">?</div><div class="num-card">?</div><div class="num-card">?</div><div class="num-card">?</div>`;
+        } else {
+            digitRow.innerHTML = nums.map(n=>`<div class="num-card" data-value="${n}">${n}</div>`).join('');
+        }
+        document.querySelectorAll('.num-card').forEach(card => {
+            card.addEventListener('click', () => {
+                let val = card.getAttribute('data-value') || card.innerText;
+                formulaInput.value += val;
+            });
+        });
+    }
+    function saveHistory() { localStorage.setItem('stardew24_final_cat', JSON.stringify(historyStack)); }
+    function loadHistory() {
+        const raw = localStorage.getItem('stardew24_final_cat');
+        if (raw) { try { let arr = JSON.parse(raw); if (Array.isArray(arr)) historyStack = arr.slice(0,MAX_HISTORY); else historyStack=[]; } catch(e){historyStack=[];} }
+        else historyStack=[];
+        renderHistory();
+    }
+    function addHistoryItem(nums, sol) {
+        historyStack.push({ nums:[...nums], solution:sol || 'No solution' });
+        if (historyStack.length > MAX_HISTORY) historyStack.shift();
+        saveHistory(); renderHistory();
+    }
+    function renderHistory() {
+        if (historyStack.length===0) { historyListDiv.innerHTML = '<div style="color:#AB986C;">No records yet</div>'; return; }
+        let html='';
+        [...historyStack].reverse().forEach(item=>{
+            const numStr = item.nums.join(' · ');
+            const solShow = item.solution.length>48 ? item.solution.slice(0,45)+'…' : item.solution;
+            html += `<div class="history-item"><span class="history-nums">${numStr}</span><span>${solShow}</span></div>`;
+        });
+        historyListDiv.innerHTML = html;
+    }
+
+    function setMsg(msg, isErr=false) { globalMsg.innerText = msg; globalMsg.style.color = isErr ? '#C1845C' : '#8C7A5A'; }
+    function clearExtra() { extraActionsDiv.innerHTML = ''; }
+    function showErrorExtra() {
+        clearExtra();
+        const cont = document.createElement('button'); cont.className='pixel-pill'; cont.innerHTML='<i class="fas fa-pen"></i> KEEP TYPING';
+        const solBtn = document.createElement('button'); solBtn.className='pixel-pill'; solBtn.innerHTML='<i class="fas fa-eye"></i> SHOW SOLUTION';
+        cont.onclick = () => { clearExtra(); setMsg('Edit your expression and submit again', false); };
+        solBtn.onclick = () => { displayCurrentSolution(); clearExtra(); };
+        extraActionsDiv.appendChild(cont); extraActionsDiv.appendChild(solBtn);
+    }
+
+    function loadProblem(nums) {
+        currentNumbers = [...nums];
+        const sol = getOneSolution(currentNumbers);
+        currentSolution = sol;
+        updateCards(currentNumbers);
+        formulaInput.value = '';
+        setMsg(`Fresh numbers: ${currentNumbers.join(' · ')}`);
+        clearExtra();
+        solutionPreview.innerHTML = 'Solution will appear here';
+        clearTips();
+        addHistoryItem(currentNumbers, currentSolution || 'No solution');
+        resetCatDialog();
+    }
+    function onSubmit() {
+        if (!currentNumbers.length) { setMsg('Please generate numbers first', true); return; }
+        const expr = formulaInput.value.trim();
+        if (!expr) { setMsg('Enter an expression', true); return; }
+        const check = validateExpression(expr, currentNumbers);
+        if (check.valid) {
+            setMsg('★ CORRECT! ★', false);
+            clearExtra();
+            solutionPreview.innerHTML = `<i class="fas fa-trophy"></i> Perfect! ${expr} = 24`;
+            triggerCatDialog('correct');
+            updateTips();
+        } else { 
+            setMsg(check.reason, true); 
+            showErrorExtra();
+        }
+    }
+    function onSolve() { displayCurrentSolution(); }
+    function onGenerate() { 
+        loadProblem(randomNumbers()); 
+        solutionPreview.innerHTML = 'Solution will appear here';
+        clearTips();
+        resetCatDialog();
+    }
+    function onCustomSolve() {
+        const a = parseInt(document.getElementById('c1').value);
+        const b = parseInt(document.getElementById('c2').value);
+        const c = parseInt(document.getElementById('c3').value);
+        const d = parseInt(document.getElementById('c4').value);
+        if (isNaN(a)||isNaN(b)||isNaN(c)||isNaN(d)) { customSolutionsDiv.innerHTML = '<i class="fas fa-exclamation"></i> Enter valid integers 1-13'; return; }
+        const nums = [a,b,c,d];
+        const all = findAllSolutions(nums);
+        if (all.length === 0) customSolutionsDiv.innerHTML = '<span style="color:#C1845C;">No solution.</span>';
+        else customSolutionsDiv.innerHTML = `<i class="fas fa-list-ul"></i> ${all.length} solution(s):<br>` + all.slice(0,28).map(ex=>`• ${ex} = 24`).join('<br>');
+    }
+
+    function initKeypad() {
+        const keys = document.querySelectorAll('.key-btn');
+        keys.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const key = btn.getAttribute('data-key');
+                if (key === 'del') {
+                    formulaInput.value = formulaInput.value.slice(0, -1);
+                } else if (key === 'clear') {
+                    formulaInput.value = '';
+                } else {
+                    formulaInput.value += key;
+                }
+            });
+        });
+        keyboardTriggerBtn.addEventListener('click', () => {
+            formulaInput.focus();
+        });
+    }
+
+    let historyOpen = false;
+    function toggleHistory() {
+        historyOpen = !historyOpen;
+        if (historyOpen) { historyCollapse.classList.add('open'); historyArrow.classList.remove('fa-chevron-down'); historyArrow.classList.add('fa-chevron-up'); }
+        else { historyCollapse.classList.remove('open'); historyArrow.classList.remove('fa-chevron-up'); historyArrow.classList.add('fa-chevron-down'); }
+    }
+
+    function init() {
+        loadHistory();
+        const defaultNumbers = [3,3,8,8];
+        currentNumbers = [...defaultNumbers];
+        currentSolution = getOneSolution(currentNumbers);
+        updateCards(currentNumbers);
+        setMsg(`Farm fresh: ${currentNumbers.join(' · ')}`, false);
+        solutionPreview.innerHTML = 'Solution will appear here';
+        clearTips();
+        if (historyStack.length === 0) addHistoryItem(currentNumbers, currentSolution);
+        else renderHistory();
+        historyCollapse.classList.remove('open'); historyOpen=false;
+        historyArrow.classList.remove('fa-chevron-up'); historyArrow.classList.add('fa-chevron-down');
+        generateBtn.addEventListener('click', onGenerate);
+        submitBtn.addEventListener('click', onSubmit);
+        solveBtn.addEventListener('click', onSolve);
+        customSolveBtn.addEventListener('click', onCustomSolve);
+        historyToggle.addEventListener('click', toggleHistory);
+        document.querySelectorAll('.pixel-num-input').forEach(inp => {
+            inp.addEventListener('change', function () { let v = parseInt(this.value); if (isNaN(v)) this.value = 1; else if (v < 1) this.value = 1; else if (v > 13) this.value = 13; });
+        });
+        initKeypad();
+        resetCatDialog();
+    }
+    init();
+</script>
+</body>
+</html>
