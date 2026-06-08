@@ -40,7 +40,7 @@
         }
 
         .farmhouse::before {
-            content: "★ 24points ★";
+            content: "★ 24 points ★";
             position: absolute;
             top: -20px;
             left: 28px;
@@ -101,7 +101,59 @@
             border-radius: 8px;
         }
 
-        /* 数字卡片网格 (可点击) */
+        /* 游戏区域容器（卡片+Random按钮）用于局部遮罩 */
+        .game-area {
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+        /* 局部启动遮罩 */
+        .start-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 102%;
+            background: rgba(50, 62, 50, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 160;
+            border-radius: 12px;
+            backdrop-filter: blur(2px);
+        }
+        .start-card-inline {
+            background: #FCF3E0;
+            border: 4px solid #7B5C3C;
+            box-shadow: 8px 8px 0 #302418;
+            padding: 1rem 2rem;
+            text-align: center;
+            border-radius: 12px;
+        }
+        .ready-text-inline {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.2rem;
+            color: #5A7540;
+            margin-bottom: 0.8rem;
+            text-shadow: 2px 2px 0 #B89A60;
+        }
+        .start-btn-inline {
+            background: #C29464;
+            border: 3px solid #5D4026;
+            box-shadow: 4px 4px 0 #2E2216;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            padding: 0.4rem 1rem;
+            cursor: pointer;
+            color: #FEF3DC;
+            transition: 0.05s linear;
+            border-radius: 8px;
+        }
+        .start-btn-inline:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #2E2216;
+        }
+
+        /* 数字卡片网格 */
         .card-row {
             display: grid;
             grid-template-columns: repeat(4, minmax(70px, 90px));
@@ -188,7 +240,6 @@
             }
         }
 
-        /* 按钮区域新布局 */
         .action-bar {
             display: flex;
             justify-content: center;
@@ -238,11 +289,6 @@
             transform: translate(2px, 2px);
             box-shadow: 1px 1px 0 #2E2216;
         }
-        .dual-actions {
-            display: flex;
-            gap: 0.6rem;
-            flex-wrap: wrap;
-        }
         .btn-gen, .pixel-btn {
             background: #C29464;
             border: 4px solid #5D4026;
@@ -262,6 +308,11 @@
             background: #AD8255;
             padding: 0.4rem 1rem;
             font-size: 0.6rem;
+        }
+        .btn-submit-green {
+            background: #6B8C42;
+            border: 4px solid #3A5C2A;
+            box-shadow: 4px 4px 0 #2A3D1E;
         }
         .btn-gen:active, .pixel-btn:active {
             transform: translate(2px, 2px);
@@ -424,7 +475,7 @@
         }
         button { cursor: pointer; }
 
-        /* 全新气泡框 (无白边箭头) 使用 clip-path 实现完美三角 */
+        /* 气泡框 */
         .pixel-dialog {
             position: absolute;
             top: 12px;
@@ -443,23 +494,6 @@
             white-space: normal;
             border-radius: 12px;
         }
-        /* 使用 clip-path 绘制指向右边的三角，与主体无缝连接 */
-        .pixel-dialog::before {
-            content: '';
-            position: absolute;
-            top: 18px;
-            right: -10px;
-            width: 14px;
-            height: 14px;
-            background: #FFFFFF;
-            border: 3px solid #000000;
-            border-left: none;
-            border-bottom: none;
-            transform: rotate(45deg);
-            clip-path: polygon(0 0, 100% 0, 100% 100%);
-            /* 只显示三角形的上半部分，使其看起来像箭头 */
-        }
-        /* 更可靠的做法：用两个伪元素 + 旋转，但为了兼容，简化为下面方式 */
         .pixel-dialog::before {
             content: '';
             position: absolute;
@@ -501,6 +535,40 @@
                 border-width: 5px 0 5px 7px;
             }
         }
+
+        /* 正确图标居中显示 */
+        .correct-icon {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #FCF3E0;
+            border: 4px solid #7B5C3C;
+            box-shadow: 8px 8px 0 #302418;
+            padding: 1rem 1.5rem;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 2rem;
+            color: #6B8C42;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 16px;
+            white-space: nowrap;
+        }
+        .correct-icon i {
+            font-size: 2rem;
+            color: #87A55C;
+        }
+        @media (max-width: 520px) {
+            .correct-icon {
+                font-size: 1rem;
+                padding: 0.6rem 1rem;
+            }
+            .correct-icon i {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -515,17 +583,24 @@
         </div>
     </div>
 
-    <!-- 数字卡片 (可点击) -->
-    <div class="card-row" id="digitRow">
-        <div class="num-card" data-value="3">3</div>
-        <div class="num-card" data-value="3">3</div>
-        <div class="num-card" data-value="8">8</div>
-        <div class="num-card" data-value="8">8</div>
-    </div>
-
-    <!-- RANDOM 按钮 (放在卡片下方) -->
-    <div style="text-align: center; margin: 0.5rem 0 0.2rem;">
-        <button class="btn-gen" id="generateBtn"><i class="fas fa-dice-d6"></i> RANDOM</button>
+    <!-- 游戏区域 (数字卡片 + Random按钮) -->
+    <div class="game-area" id="gameArea">
+        <div class="card-row" id="digitRow">
+            <div class="num-card" data-value="3">3</div>
+            <div class="num-card" data-value="3">3</div>
+            <div class="num-card" data-value="8">8</div>
+            <div class="num-card" data-value="8">8</div>
+        </div>
+        <div style="text-align: center; margin: 0.5rem 0 0.2rem;">
+            <button class="btn-gen" id="generateBtn"><i class="fas fa-dice-d6"></i> RANDOM</button>
+        </div>
+        <!-- 启动遮罩层 (仅覆盖该区域) -->
+        <div class="start-overlay" id="startOverlay">
+            <div class="start-card-inline">
+                <div class="ready-text-inline">READY</div>
+                <button class="start-btn-inline" id="startBtnInline">START</button>
+            </div>
+        </div>
     </div>
 
     <!-- 运算符软键盘 -->
@@ -540,9 +615,9 @@
         <div class="key-btn special" data-key="clear">C</div>
     </div>
 
-    <!-- SUBMIT 和 SOLVE 按钮 (放在运算符下方) -->
+    <!-- SUBMIT 和 SOLVE 按钮 -->
     <div class="action-bar">
-        <button class="pixel-btn" id="submitBtn"><i class="fas fa-check"></i> SUBMIT</button>
+        <button class="pixel-btn btn-submit-green" id="submitBtn"><i class="fas fa-check"></i> SUBMIT</button>
         <button class="pixel-btn" id="solveBtn"><i class="fas fa-lightbulb"></i> SOLVE</button>
     </div>
 
@@ -559,7 +634,7 @@
     <div class="solution-pixel" id="solutionPreview">Solution will appear here</div>
     <div id="tipsArea" class="tips-area">💡 Tip: Click SOLVE to see a 24-point strategy</div>
 
-    <!-- 自定义模块 -->
+    <!-- 自定义模块和历史记录 -->
     <div class="custom-panel">
         <div class="custom-title"><i class="fas fa-tractor"></i> CUSTOM NUMBERS</div>
         <div class="custom-inputs-wrapper">
@@ -577,7 +652,6 @@
         <div class="gray-hint">* integers 1-13, shows up to 28 solutions</div>
     </div>
 
-    <!-- 历史 -->
     <div class="history-area">
         <div class="history-header" id="historyToggle">
             <span><i class="fas fa-history"></i> LAST 10 ROUNDS</span>
@@ -599,7 +673,6 @@
         ctx.imageSmoothingEnabled = false;
         canvas.width = 72;
         canvas.height = 72;
-
         const catPattern = [
             [0,0,0,0,0,0,0,0,0,0,0,0],
             [0,0,2,2,0,0,0,0,2,2,0,0],
@@ -614,7 +687,6 @@
             [0,1,1,1,3,3,3,3,1,1,1,0],
             [0,1,1,3,3,3,3,3,3,1,1,0]
         ];
-
         function getColor(val) {
             switch(val) {
                 case 1: return '#F9A66C';
@@ -625,7 +697,6 @@
                 default: return '#A57C5C';
             }
         }
-
         let blinkFlag = false;
         function drawCat(blinkState = false) {
             ctx.clearRect(0, 0, 72, 72);
@@ -665,43 +736,32 @@
         };
     })();
 
-    // ======================= 猫猫对话系统 (颜文字置句首) =======================
+    // ======================= 猫猫对话系统 =======================
     let dialogTimeout = null;
     let currentDialog = null;
     const catWrapper = document.getElementById('catWrapper');
-    
     function clearDialog() {
-        if (currentDialog) {
-            currentDialog.remove();
-            currentDialog = null;
-        }
-        if (dialogTimeout) {
-            clearTimeout(dialogTimeout);
-            dialogTimeout = null;
-        }
+        if (currentDialog) { currentDialog.remove(); currentDialog = null; }
+        if (dialogTimeout) { clearTimeout(dialogTimeout); dialogTimeout = null; }
     }
-    
-    function showCatDialog(message) {
+    function showCatDialog(message, autoCloseMs = 10000) {
         clearDialog();
         const dialog = document.createElement('div');
         dialog.className = 'pixel-dialog';
         dialog.innerText = message;
         catWrapper.appendChild(dialog);
         currentDialog = dialog;
-        dialogTimeout = setTimeout(() => {
-            if (currentDialog) {
-                currentDialog.remove();
-                currentDialog = null;
-            }
-            dialogTimeout = null;
-        }, 10000);
+        if (autoCloseMs > 0) {
+            dialogTimeout = setTimeout(() => {
+                if (currentDialog) { currentDialog.remove(); currentDialog = null; }
+                dialogTimeout = null;
+            }, autoCloseMs);
+        }
     }
-    
-    // 颜文字统一放在句首，后跟空格，防止换行破坏
     const catMessages = {
         correct: [
             "(^･ω･^)✨ ★ Correct! ★", "(=ↀωↀ=)✧ Purrfect! 24 points!", "(ฅ^•ﻌ•^ฅ) Nyaa! You nailed it!", 
-            "(´｡• ᵕ •｡`) ♡ Meow~ Great job!", "(๑•̀ㅂ•́)و✧ +1 paw!", "(っ´▽`)っ★ Hooray!"
+            "(´｡• ᵕ •｡`) ♡ Meow~ Great job!", "(๑•̀ㅂ•́)و✧ +1 paw!", "(っ´▽`)っ★ 牛!"
         ],
         solve: [
             "(￣ω￣) Hehe, here's the answer!", "(ฅ´ω`ฅ) Mew mew! Look at this~", "(ΦωΦ) Trust my whiskers!",
@@ -712,25 +772,17 @@
             "(｡•́︿•̀｡) This set has no answer...", "(´-ω-`) Try another one!", "(×﹏×) Stumped me too!"
         ],
         click: [
-            "(^･ω･^) Meow! Need help?", "(ฅ^•ﻌ•^ฅ) Purr... click RANDOM~", "(｀・ω・´) Nyaa! Let's go!",
-            "(*´▽`*) Keep going!", "(◕‿◕✿) Chirp! I believe in you", "(ΦωΦ) What's 24 today?"
+            "(^･ω･^) Meow! Need help?", "(ฅ^•ﻌ•^ฅ) Purr... click RANDOM~", "(｀・ω・´) 吃饭饭咯!",
+            "(*´▽`*) 我喜欢妈妈!", "(◕‿◕✿) 我叫罐罐哦～", "(ΦωΦ) 吃饭没?"
         ]
     };
-    
-    function triggerCatDialog(type) {
+    function triggerCatDialog(type, autoCloseMs = 10000) {
         let list = catMessages[type] || catMessages.click;
         let msg = list[Math.floor(Math.random() * list.length)];
-        showCatDialog(msg);
+        showCatDialog(msg, autoCloseMs);
         if (window.catBlink) window.catBlink();
     }
-    
-    catWrapper.addEventListener('click', () => {
-        triggerCatDialog('click');
-    });
-    
-    function resetCatDialog() {
-        clearDialog();
-    }
+    catWrapper.addEventListener('click', () => triggerCatDialog('click'));
 
     // ======================= 24点核心逻辑 =======================
     let currentNumbers = [];
@@ -754,6 +806,7 @@
     const historyToggle = document.getElementById('historyToggle');
     const historyArrow = document.getElementById('historyArrow');
     const historyCollapse = document.getElementById('historyCollapse');
+    const startOverlay = document.getElementById('startOverlay');
 
     const tipLibrary = [
         "Aim for 3×8, 4×6, 12+12, 16+8, 30-6, 72÷3.",
@@ -774,11 +827,7 @@
     function clearTips() { tipsArea.innerHTML = `💡 Tip: Click SOLVE to see a 24-point strategy`; }
 
     function displayCurrentSolution() {
-        if (!currentNumbers.length) { 
-            solutionPreview.innerText = 'No active puzzle'; 
-            clearTips();
-            return; 
-        }
+        if (!currentNumbers.length) { solutionPreview.innerText = 'No active puzzle'; clearTips(); return; }
         const sol = getOneSolution(currentNumbers);
         if (sol) { 
             currentSolution = sol; 
@@ -837,10 +886,7 @@
         return Array.from(solSet).slice(0, 28);
     }
 
-    function getOneSolution(nums) {
-        const all = findAllSolutions(nums);
-        return all.length ? all[0] : null;
-    }
+    function getOneSolution(nums) { const all = findAllSolutions(nums); return all.length ? all[0] : null; }
 
     function validateExpression(expr, target) {
         let clean = expr.replace(/\s/g,'');
@@ -863,16 +909,10 @@
 
     function randomNumbers() { return [Math.floor(Math.random()*13)+1, Math.floor(Math.random()*13)+1, Math.floor(Math.random()*13)+1, Math.floor(Math.random()*13)+1]; }
     function updateCards(nums) {
-        if (!nums.length) {
-            digitRow.innerHTML = `<div class="num-card">?</div><div class="num-card">?</div><div class="num-card">?</div><div class="num-card">?</div>`;
-        } else {
-            digitRow.innerHTML = nums.map(n=>`<div class="num-card" data-value="${n}">${n}</div>`).join('');
-        }
+        if (!nums.length) { digitRow.innerHTML = `<div class="num-card">?</div>`.repeat(4); }
+        else { digitRow.innerHTML = nums.map(n=>`<div class="num-card" data-value="${n}">${n}</div>`).join(''); }
         document.querySelectorAll('.num-card').forEach(card => {
-            card.addEventListener('click', () => {
-                let val = card.getAttribute('data-value') || card.innerText;
-                formulaInput.value += val;
-            });
+            card.addEventListener('click', () => { formulaInput.value += card.getAttribute('data-value') || card.innerText; });
         });
     }
     function saveHistory() { localStorage.setItem('stardew24_final_cat', JSON.stringify(historyStack)); }
@@ -909,7 +949,7 @@
         extraActionsDiv.appendChild(cont); extraActionsDiv.appendChild(solBtn);
     }
 
-    function loadProblem(nums) {
+    function loadProblem(nums, addToHistory = true) {
         currentNumbers = [...nums];
         const sol = getOneSolution(currentNumbers);
         currentSolution = sol;
@@ -919,32 +959,42 @@
         clearExtra();
         solutionPreview.innerHTML = 'Solution will appear here';
         clearTips();
-        addHistoryItem(currentNumbers, currentSolution || 'No solution');
-        resetCatDialog();
+        if (addToHistory) addHistoryItem(currentNumbers, currentSolution || 'No solution');
     }
+
+    // 正确时显示图标和猫猫气泡，1秒后自动下一题
+    function handleCorrect() {
+        // 显示猫猫祝贺气泡（1秒后自动清除）
+        triggerCatDialog('correct', 1000);
+        // 显示像素风格正确图标
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'correct-icon';
+        iconDiv.innerHTML = '<i class="fas fa-check-circle"></i> ★ CORRECT! ★';
+        document.body.appendChild(iconDiv);
+        // 1秒后清除图标和气泡，并随机下一题
+        setTimeout(() => {
+            if (iconDiv) iconDiv.remove();
+            clearDialog(); // 清除猫猫气泡
+            const newNums = randomNumbers();
+            loadProblem(newNums);
+        }, 1000);
+    }
+
     function onSubmit() {
         if (!currentNumbers.length) { setMsg('Please generate numbers first', true); return; }
         const expr = formulaInput.value.trim();
         if (!expr) { setMsg('Enter an expression', true); return; }
         const check = validateExpression(expr, currentNumbers);
         if (check.valid) {
-            setMsg('★ CORRECT! ★', false);
-            clearExtra();
-            solutionPreview.innerHTML = `<i class="fas fa-trophy"></i> Perfect! ${expr} = 24`;
-            triggerCatDialog('correct');
-            updateTips();
+            handleCorrect();
         } else { 
             setMsg(check.reason, true); 
             showErrorExtra();
         }
     }
+
     function onSolve() { displayCurrentSolution(); }
-    function onGenerate() { 
-        loadProblem(randomNumbers()); 
-        solutionPreview.innerHTML = 'Solution will appear here';
-        clearTips();
-        resetCatDialog();
-    }
+    function onGenerate() { loadProblem(randomNumbers()); }
     function onCustomSolve() {
         const a = parseInt(document.getElementById('c1').value);
         const b = parseInt(document.getElementById('c2').value);
@@ -958,22 +1008,15 @@
     }
 
     function initKeypad() {
-        const keys = document.querySelectorAll('.key-btn');
-        keys.forEach(btn => {
+        document.querySelectorAll('.key-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const key = btn.getAttribute('data-key');
-                if (key === 'del') {
-                    formulaInput.value = formulaInput.value.slice(0, -1);
-                } else if (key === 'clear') {
-                    formulaInput.value = '';
-                } else {
-                    formulaInput.value += key;
-                }
+                if (key === 'del') formulaInput.value = formulaInput.value.slice(0, -1);
+                else if (key === 'clear') formulaInput.value = '';
+                else formulaInput.value += key;
             });
         });
-        keyboardTriggerBtn.addEventListener('click', () => {
-            formulaInput.focus();
-        });
+        keyboardTriggerBtn.addEventListener('click', () => formulaInput.focus());
     }
 
     let historyOpen = false;
@@ -983,19 +1026,17 @@
         else { historyCollapse.classList.remove('open'); historyArrow.classList.remove('fa-chevron-up'); historyArrow.classList.add('fa-chevron-down'); }
     }
 
+    // 启动游戏：移除遮罩，随机题目
+    function startGame() {
+        startOverlay.style.display = 'none';
+        // 随机出题，不添加历史（因为刚启动，让用户第一次玩的题目也进历史）
+        const firstNums = randomNumbers();
+        loadProblem(firstNums, true);
+    }
+
     function init() {
         loadHistory();
-        const defaultNumbers = [3,3,8,8];
-        currentNumbers = [...defaultNumbers];
-        currentSolution = getOneSolution(currentNumbers);
-        updateCards(currentNumbers);
-        setMsg(`Farm fresh: ${currentNumbers.join(' · ')}`, false);
-        solutionPreview.innerHTML = 'Solution will appear here';
-        clearTips();
-        if (historyStack.length === 0) addHistoryItem(currentNumbers, currentSolution);
-        else renderHistory();
-        historyCollapse.classList.remove('open'); historyOpen=false;
-        historyArrow.classList.remove('fa-chevron-up'); historyArrow.classList.add('fa-chevron-down');
+        // 绑定事件
         generateBtn.addEventListener('click', onGenerate);
         submitBtn.addEventListener('click', onSubmit);
         solveBtn.addEventListener('click', onSolve);
@@ -1005,7 +1046,9 @@
             inp.addEventListener('change', function () { let v = parseInt(this.value); if (isNaN(v)) this.value = 1; else if (v < 1) this.value = 1; else if (v > 13) this.value = 13; });
         });
         initKeypad();
-        resetCatDialog();
+        // 启动按钮
+        document.getElementById('startBtnInline').addEventListener('click', startGame);
+        // 初始时卡片显示为占位 (3,3,8,8) 但被遮罩覆盖，无需额外操作
     }
     init();
 </script>
