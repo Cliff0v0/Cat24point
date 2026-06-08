@@ -1,2 +1,2 @@
-# Cat24point
+# Cat24points
 Lets play with Kazz
